@@ -1,0 +1,36 @@
+{
+    "name": "kamrul-haque/action-crud-helper",
+    "description": "Generate everything needed for a CRUD operation in Laravel with or without Action classes executing just one command. Also generates frontend scaffolding for blade or vue inertia stack.",
+    "authors": [
+        {
+            "name": "Kamrul-Haque",
+            "email": "utchas903@gmail.com",
+            "role": "developer"
+        }
+    ],
+    "type": "package",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "KamrulHaque\\ActionCrudHelper\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "KamrulHaque\\ActionCrudHelper\\ActionCrudHelperServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
