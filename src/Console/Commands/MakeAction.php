@@ -33,24 +33,27 @@ class MakeAction extends Command implements PromptsForMissingInput
      */
     public function handle(): int
     {
-        $className = Str::studly($this->argument('name'));
+        $className = Str::studly(Str::afterLast($this->argument('name'), '/'));
+        $directoryPrefix = Str::beforeLast($this->argument('name'), '/');
+
+        $this->info($directoryPrefix);
 
         $stubPath = base_path('stubs/action.stub');
-        $namespace = $this->option('api') ? 'App\Actions\Api' : 'App\Actions';
-        $directoryPath = $this->option('api') ? app_path('Actions/Api') :
-            app_path('Actions');
+        $namespace = $this->option('api') ? "App\Actions\Api\\".$directoryPrefix : "App\Actions\\".$directoryPrefix;
+        $directoryPath = $this->option('api') ? app_path('Actions/Api/'.$directoryPrefix) :
+            app_path('Actions/'.$directoryPrefix);
         $targetPath = "{$directoryPath}/{$className}.php";
 
-        $this->ensureTheBaseActionClassExists();
-
-        $this->ensureTheDirectoryExists($directoryPath);
-
         if (! File::exists($targetPath)) {
+            $this->ensureTheBaseActionClassExists();
+
+            $this->ensureTheDirectoryExists($directoryPath);
+
             $this->generateClass($stubPath, $className, $namespace, $targetPath);
 
-            $this->components->info("Action class [{$targetPath}] created successfully.");
+            $this->components->info("Action class [$targetPath] created successfully.");
         } else {
-            $this->components->error("Action class [{$targetPath}] already exists.");
+            $this->components->error("Action class [$targetPath] already exists.");
         }
 
         return 0;
