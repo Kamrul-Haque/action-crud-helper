@@ -3,23 +3,23 @@ Generate everything needed for a CRUD operation in Laravel with or without Actio
 
 ## Installation
 
-Install the package via [composer](https://getcomposer.org/):
+- Install the package via [composer](https://getcomposer.org/):
 ```
 composer require kamrul-haque/action-crud-helper
 ```
-
-## Usage
-
 - Publish stubs for files generated:
 ```
 php artisan vendor:publish --tag="action-crud-stubs"
 ```
+
+## Usage
+
 - To generate `CRUD` helpers:
 ```
 php artisan make:crud ModelName --stack --all
 ``` 
 *supported stacks are api, blade or inertia (inertia vue). --all option will generate everything required for a CRUD operation along with Action classes. Alternatively, run the command without stack & all options to select files to generate interactively.*
-- To generate only `action` class:
+- To generate only `Action` class:
 ```
 php artisan make:action ActionName
 ``` 
