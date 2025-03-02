@@ -53,7 +53,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $option = $this->parseOption();
 
         if (! $this->option('all')) {
-            $this->selectClasses();
+            $this->selectClasses($option);
         } else {
             $this->selectedClasses[] = 'All';
         }
@@ -147,9 +147,11 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Select Classes to Generate
      *
+     * @param  string  $option  the option selected
+     *
      * @throws InvalidTerminalException
      */
-    private function selectClasses(): void
+    private function selectClasses(string $option): void
     {
         $classSelection = $this->choice(
             'Units to Generate',
@@ -163,7 +165,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             return;
         }
 
-        $menuBuilder = (new CliMenuBuilder())
+        $menuBuilder = (new CliMenuBuilder)
             ->modifyCheckboxStyle(function (CheckboxStyle $style) {
                 $style->setUncheckedMarker('[ ] ')
                     ->setCheckedMarker('[●] ');
@@ -173,7 +175,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             ->setBackgroundColour('default')
             ->setForegroundColour('default');
 
-        $selectableClasses = Arr::except($this->classes, 9);
+        $selectableClasses = $option === 'Api' ? Arr::except($this->classes, [8, 9]) : Arr::except($this->classes, [3, 9]);
 
         // Add checkbox items to the menu
         foreach ($selectableClasses as $class) {
