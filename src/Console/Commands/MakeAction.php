@@ -35,9 +35,6 @@ class MakeAction extends Command implements PromptsForMissingInput
     {
         $className = Str::studly(Str::afterLast($this->argument('name'), '/'));
         $directoryPrefix = Str::beforeLast($this->argument('name'), '/');
-
-        $this->info($directoryPrefix);
-
         $stubPath = base_path('stubs/action.stub');
         $namespace = $this->option('api') ? "App\Actions\Api\\".$directoryPrefix : "App\Actions\\".$directoryPrefix;
         $directoryPath = $this->option('api') ? app_path('Actions/Api/'.$directoryPrefix) :

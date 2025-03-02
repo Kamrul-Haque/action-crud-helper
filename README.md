@@ -14,7 +14,7 @@ composer require kamrul-haque/action-crud-helper --dev
 - Publish stubs for files generated:
 
 ```
-php artisan vendor:publish --tag="action-crud-stubs"
+php artisan vendor:publish --tag="action-crud-helper-stubs"
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ php artisan make:action ActionName
 - To publish the tests:
 
 ```
-php artisan vendor:publish --tag="action-crud-tests"
+php artisan vendor:publish --tag="action-crud-helper-tests"
 ```
 
 *Note: the tests for the package only support PestPHP currently.*
