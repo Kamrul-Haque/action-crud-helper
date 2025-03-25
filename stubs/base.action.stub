@@ -9,11 +9,6 @@ use ReflectionMethod;
 abstract class BaseAction
 {
     /**
-     * Entrypoint for actions
-     **/
-    abstract public function handle();
-
-    /**
      * Blocks creating constructor on child classes and initiates public method validation while creating child object
      *
      * @throws Exception
@@ -33,9 +28,13 @@ abstract class BaseAction
         $reflection = new ReflectionClass($this);
         $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
+        if (! method_exists($this, 'handle')) {
+            throw new Exception(get_class($this).' must implement handle() method.');
+        }
+
         foreach ($methods as $method) {
             if ($method->getName() !== 'handle' && $method->class === $reflection->getName()) {
-                throw new Exception("Public method '{$method->getName()}' is not allowed in class '{$method->class}'.");
+                throw new Exception("public method '{$method->getName()}' is not allowed in class '{$method->class}'.");
             }
         }
     }
