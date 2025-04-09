@@ -46,7 +46,7 @@ class MakeAction extends Command implements PromptsForMissingInput
             : app_path('Actions/' . $directoryPrefix);
         $targetPath = "{$directoryPath}/{$className}.php";
 
-        if (! File::exists($targetPath)) {
+        if (!File::exists($targetPath)) {
             $this->ensureTheBaseActionClassExists();
 
             $this->ensureTheDirectoryExists($directoryPath);
@@ -68,11 +68,11 @@ class MakeAction extends Command implements PromptsForMissingInput
      */
     private function ensureTheBaseActionClassExists(): void
     {
-        if (! File::exists(app_path('Actions'))) {
+        if (!File::exists(app_path('Actions'))) {
             File::makeDirectory(app_path('Actions'));
         }
 
-        if (! File::exists('app/Actions/BaseAction.php')) {
+        if (!File::exists('app/Actions/BaseAction.php')) {
             $baseActionStub = File::get(base_path('stubs/base.action.stub'));
 
             File::put('app/Actions/BaseAction.php', $baseActionStub);
@@ -82,11 +82,11 @@ class MakeAction extends Command implements PromptsForMissingInput
     /**
      * Ensure the directory exists
      *
-     * @param  string  $directoryPath  Path of the directory
+     * @param string $directoryPath Path of the directory
      */
     private function ensureTheDirectoryExists(string $directoryPath): void
     {
-        if (! File::exists($directoryPath)) {
+        if (!File::exists($directoryPath)) {
             File::makeDirectory($directoryPath, 0755, true);
         }
     }
@@ -94,10 +94,10 @@ class MakeAction extends Command implements PromptsForMissingInput
     /**
      * Generate the Action class
      *
-     * @param  string  $stubPath  path of the class stub
-     * @param  string  $className  name of the action class
-     * @param  string  $namespace  namespace of the class
-     * @param  string  $targetPath  path to create the class
+     * @param string $stubPath path of the class stub
+     * @param string $className name of the action class
+     * @param string $namespace namespace of the class
+     * @param string $targetPath path to create the class
      *
      * @throws FileNotFoundException
      */
