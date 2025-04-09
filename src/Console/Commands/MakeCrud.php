@@ -310,7 +310,9 @@ class MakeCrud extends Command implements PromptsForMissingInput
     {
         $uri = Str::plural(Str::slug(Str::snake($model)));
         $prefix = $apiPrefix ? rtrim($apiPrefix, '/') . '\\' : '';
-        $route = "\nRoute::resource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);";
+        $route = $apiPrefix
+            ? "\nRoute::apiResource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);"
+            : "\nRoute::resource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);";
         $filePath = $apiPrefix ? base_path('routes/api.php') : base_path('routes/web.php');
 
         if ($apiPrefix) {
