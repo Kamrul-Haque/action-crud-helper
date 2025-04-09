@@ -15,9 +15,9 @@ use PhpSchool\CliMenu\Style\CheckboxStyle;
 
 class MakeCrud extends Command implements PromptsForMissingInput
 {
-    protected array $actions = ['get', 'create', 'store', 'show', 'edit', 'update', 'destroy'];
+    protected array $actions = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'];
 
-    protected array $apiActions = ['get', 'store', 'show', 'update', 'destroy'];
+    protected array $apiActions = ['index', 'store', 'show', 'update', 'destroy'];
 
     protected array $classes = [
         'Model & Migration',
