@@ -8,6 +8,7 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use function Laravel\Prompts\multiselect;
 
 class MakeCrud extends Command implements PromptsForMissingInput
 {
@@ -176,12 +177,10 @@ class MakeCrud extends Command implements PromptsForMissingInput
             Arr::except($this->classes, [3, 9]);
 
         // Show the multi-select prompt
-        $this->selectedClasses = $this->choice(
-            'Select Files to Generate (use ARROW to navigate, SPACE to toggle, ENTER to confirm)',
-            $selectableClasses,
-            null,
-            null,
-            true
+        $this->selectedClasses = multiselect(
+            label: 'Select Files to Generate',
+            options: $selectableClasses,
+            hint: 'Use arrow keys to navigate, space to toggle, enter to confirm'
         );
     }
 
