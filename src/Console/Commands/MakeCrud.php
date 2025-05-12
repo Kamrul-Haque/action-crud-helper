@@ -8,10 +8,6 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use PhpSchool\CliMenu\Builder\CliMenuBuilder;
-use PhpSchool\CliMenu\CliMenu;
-use PhpSchool\CliMenu\Exception\InvalidTerminalException;
-use PhpSchool\CliMenu\Style\CheckboxStyle;
 
 class MakeCrud extends Command implements PromptsForMissingInput
 {
@@ -176,32 +172,17 @@ class MakeCrud extends Command implements PromptsForMissingInput
             return;
         }
 
-        $menuBuilder = (new CliMenuBuilder)
-            ->modifyCheckboxStyle(function (CheckboxStyle $style) {
-                $style->setUncheckedMarker('[ ] ')
-                      ->setCheckedMarker('[●] ');
-            })
-            ->setTitle('Select Units to Generate (ARROW to navigate, SPACE/ENTER to toggle, EXIT to confirm)')
-            ->setWidth(60)
-            ->setBackgroundColour('default')
-            ->setForegroundColour('default');
-
         $selectableClasses = $option === 'Api' ? Arr::except($this->classes, [8, 9]) :
             Arr::except($this->classes, [3, 9]);
 
-        // Add checkbox items to the menu
-        foreach ($selectableClasses as $class) {
-            $menuBuilder->addCheckboxItem($class, function (CliMenu $menu) use ($class) {
-                if (in_array($class, $this->selectedClasses)) {
-                    $this->selectedClasses = array_diff($this->selectedClasses, [$class]); // Uncheck
-                } else {
-                    $this->selectedClasses[] = $class;
-                }
-            });
-        }
-
-        $menu = $menuBuilder->build();
-        $menu->open();
+        // Show the multi-select prompt
+        $this->selectedClasses = $this->choice(
+            'Select Files to Generate (use ARROW to navigate, SPACE to toggle, ENTER to confirm)',
+            $selectableClasses,
+            null,
+            null,
+            true
+        );
     }
 
     /**
