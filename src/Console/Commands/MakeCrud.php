@@ -115,7 +115,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         if (empty($this->selectedClasses)) {
             $this->components->error('Aborted or Empty Selection.');
         } else {
-            $this->components->info('Required units generated successfully.');
+            $this->components->info('Required files generated successfully.');
         }
 
         return 0;
