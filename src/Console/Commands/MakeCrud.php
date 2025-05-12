@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use function Laravel\Prompts\multiselect;
+use function Laravel\Prompts\text;
 
 class MakeCrud extends Command implements PromptsForMissingInput
 {
@@ -163,7 +164,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
     {
         $classSelection = $this->choice(
             'Units to Generate',
-            ['All', 'Select Units'],
+            ['All', 'Select Files'],
             0
         );
 
