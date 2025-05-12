@@ -176,12 +176,28 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $selectableClasses = $option === 'Api' ? Arr::except($this->classes, [8, 9]) :
             Arr::except($this->classes, [3, 9]);
 
-        // Show the multi-select prompt
-        $this->selectedClasses = multiselect(
-            label: 'Select Files to Generate',
-            options: $selectableClasses,
-            hint: 'Use arrow keys to navigate, space to toggle, enter to confirm'
-        );
+        if (str_starts_with(PHP_OS_FAMILY, 'Windows')) {
+            // Fallback for Windows: show numbered list and prompt text input
+            foreach ($selectableClasses as $index => $label) {
+                $this->line("[$index] $label");
+            }
+    
+            $input = text('Enter comma-separated indexes of files to generate (e.g. 0,2,3)');
+            $indexes = array_filter(array_map('trim', explode(',', $input)));
+    
+            foreach ($indexes as $i) {
+                if (is_numeric($i) && isset($selectableClasses[(int)$i])) {
+                    $this->selectedClasses[] = $selectableClasses[(int)$i];
+                }
+            }
+        } else {
+            // Show the multi-select prompt
+            $this->selectedClasses = multiselect(
+                label: 'Select Files to Generate',
+                options: $selectableClasses,
+                hint: 'Use arrow keys to navigate, space to toggle, enter to confirm'
+            );
+        }
     }
 
     /**
