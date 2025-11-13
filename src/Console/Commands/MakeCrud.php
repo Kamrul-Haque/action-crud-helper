@@ -285,7 +285,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
 
         foreach ($actions as $action) {
             $this->call('make:test', [
-                'name' => $directoryPath.'/'.$action.$model.'Test',
+                'name' => $directoryPath.'/'.Str::studly($action).$model.'Test',
             ]);
         }
     }
