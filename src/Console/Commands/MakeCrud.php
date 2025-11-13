@@ -8,6 +8,7 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+
 use function Laravel\Prompts\multiselect;
 use function Laravel\Prompts\text;
 
@@ -95,7 +96,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         }
 
         if ($generateAll || in_array($this->classes[5], $this->selectedClasses)) {
-            $this->createTest($model, $apiPrefix);
+            $this->createTest($actions, $model, $apiPrefix);
         }
 
         if ($generateAll || in_array($this->classes[6], $this->selectedClasses)) {
@@ -156,7 +157,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Select Classes to Generate
      *
-     * @param string $option the option selected
+     * @param  string  $option  the option selected
      *
      * @throws InvalidTerminalException
      */
@@ -182,13 +183,13 @@ class MakeCrud extends Command implements PromptsForMissingInput
             foreach ($selectableClasses as $index => $label) {
                 $this->line("[$index] $label");
             }
-    
+
             $input = text('Enter comma-separated indexes of files to generate (e.g. 0,2,3)');
             $indexes = array_filter(array_map('trim', explode(',', $input)));
-    
+
             foreach ($indexes as $i) {
-                if (is_numeric($i) && isset($selectableClasses[(int)$i])) {
-                    $this->selectedClasses[] = $selectableClasses[(int)$i];
+                if (is_numeric($i) && isset($selectableClasses[(int) $i])) {
+                    $this->selectedClasses[] = $selectableClasses[(int) $i];
                 }
             }
         } else {
@@ -204,7 +205,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create Model Class
      *
-     * @param string $model the model name
+     * @param  string  $model  the model name
      */
     private function createModelMigration(string $model): void
     {
@@ -217,82 +218,91 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create Resourceful Controller
      *
-     * @param string $model the model name
-     * @param string|null $apiPrefix prefix for API option
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
      */
     private function createController(string $model, ?string $apiPrefix): void
     {
         $this->call('make:controller', [
-            'name' => $apiPrefix . $model . 'Controller',
+            'name' => $apiPrefix.$model.'Controller',
             '--model' => $model,
             '--resource' => true,
-            '--api' => (bool)$apiPrefix,
+            '--api' => (bool) $apiPrefix,
         ]);
     }
 
     /**
      * Create Form Request Class
      *
-     * @param string $model the model name
-     * @param string|null $apiPrefix prefix for API option
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
      */
     private function createRequest(string $model, ?string $apiPrefix): void
     {
         $this->call('make:request', [
-            'name' => $apiPrefix . $model . 'Request',
+            'name' => $apiPrefix.$model.'Request',
         ]);
     }
 
     /**
      * Create API Resource Class
      *
-     * @param string $model the model name
+     * @param  string  $model  the model name
      */
     private function createResource(string $model): void
     {
         $this->call('make:resource', [
-            'name' => $model . 'Resource',
+            'name' => $model.'Resource',
         ]);
     }
 
     /**
      * Create Seeder Class
      *
-     * @param string $model the model name
+     * @param  string  $model  the model name
      */
     private function createSeeder(string $model): void
     {
         $this->call('make:seeder', [
-            'name' => $model . 'Seeder',
+            'name' => $model.'Seeder',
         ]);
     }
 
     /**
-     * Create Feature Test Class
+     * Create Feature Test Classes
      *
-     * @param string $model the model name
-     * @param string|null $apiPrefix prefix for API option
+     * @param  array  $actions  list of actions
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
      */
-    private function createTest(string $model, ?string $apiPrefix): void
+    private function createTest(array $actions, string $model, ?string $apiPrefix): void
     {
-        $this->call('make:test', [
-            'name' => $apiPrefix . $model . 'Test',
-        ]);
+        $directoryPath = $apiPrefix.$model.'Tests';
+
+        if (!File::exists($directoryPath)) {
+            File::makeDirectory($directoryPath, 0755, true);
+        }
+
+        foreach ($actions as $action) {
+            $this->call('make:test', [
+                'name' => $directoryPath.$action.$model.'Test',
+            ]);
+        }
     }
 
     /**
      * Create Action Classes
      *
-     * @param array $actions list of actions
-     * @param string $model the model name
-     * @param string|null $apiPrefix prefix for API option
+     * @param  array  $actions  list of actions
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
      */
     private function createActions(array $actions, string $model, ?string $apiPrefix): void
     {
         foreach ($actions as $action) {
             $this->call('make:action', [
-                'name' => $model . 'Actions/' . $action . $model . 'Action',
-                '--api' => (bool)$apiPrefix,
+                'name' => $model.'Actions/'.$action.$model.'Action',
+                '--api' => (bool) $apiPrefix,
             ]);
         }
     }
@@ -300,13 +310,13 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create Resource Route
      *
-     * @param string $model the model name
-     * @param string|null $apiPrefix prefix for API option
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
      */
     private function createRoute(string $model, ?string $apiPrefix): void
     {
         $uri = Str::plural(Str::slug(Str::snake($model)));
-        $prefix = $apiPrefix ? rtrim($apiPrefix, '/') . '\\' : '';
+        $prefix = $apiPrefix ? rtrim($apiPrefix, '/').'\\' : '';
         $route = $apiPrefix
             ? "\nRoute::apiResource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);"
             : "\nRoute::resource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);";
@@ -337,8 +347,8 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create Views
      *
-     * @param string $model the model name
-     * @param string $option the option selected
+     * @param  string  $model  the model name
+     * @param  string  $option  the option selected
      *
      * @throws FileNotFoundException
      */
@@ -359,9 +369,9 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create blade frontend scaffolding
      *
-     * @param string $model the model name
-     * @param string $slug slug from model name
-     * @param string $variable camel case variable name from model name
+     * @param  string  $model  the model name
+     * @param  string  $slug  slug from model name
+     * @param  string  $variable  camel case variable name from model name
      *
      * @throws FileNotFoundException
      */
@@ -441,9 +451,9 @@ class MakeCrud extends Command implements PromptsForMissingInput
     /**
      * Create vue frontend scaffolding
      *
-     * @param string $model the model name
-     * @param string $slug slug from model name
-     * @param string $variable camel case variable name from model name
+     * @param  string  $model  the model name
+     * @param  string  $slug  slug from model name
+     * @param  string  $variable  camel case variable name from model name
      *
      * @throws FileNotFoundException
      */
