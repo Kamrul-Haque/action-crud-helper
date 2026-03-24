@@ -35,6 +35,12 @@ generate interactively.*
 php artisan make:action ActionName
 ``` 
 
+- To generate only `DTO` class:
+
+```
+php artisan make:dto DtoName
+``` 
+
 - To customize the `files` generated, customize the stubs files located in `stubs` folder:
 - To publish the tests:
 

@@ -5,6 +5,7 @@ namespace KamrulHaque\ActionCrudHelper;
 use Illuminate\Support\ServiceProvider;
 use KamrulHaque\ActionCrudHelper\Console\Commands\MakeAction;
 use KamrulHaque\ActionCrudHelper\Console\Commands\MakeCrud;
+use KamrulHaque\ActionCrudHelper\Console\Commands\MakeDto;
 
 class ActionCrudHelperServiceProvider extends ServiceProvider
 {
@@ -37,6 +38,7 @@ class ActionCrudHelperServiceProvider extends ServiceProvider
             $this->commands([
                 MakeAction::class,
                 MakeCrud::class,
+                MakeDto::class,
             ]);
         }
     }
