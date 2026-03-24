@@ -1,0 +1,35 @@
+<?php
+
+namespace {{ namespace }};
+
+readonly class {{ className }}
+{
+    /**
+     * Create a new {{ className }} instance.
+     */
+    public function __construct(
+        //
+    ) {}
+
+    /**
+     * Create a new {{ className }} instance from a Request.
+     */
+    public static function fromRequest($request): self
+    {
+        return new self(
+            //
+        );
+    }
+
+    /**
+     * Convert the {{ className }} instance to an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            //
+        ];
+    }
+}

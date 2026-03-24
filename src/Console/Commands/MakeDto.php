@@ -8,23 +8,22 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Str;
 
-class MakeAction extends Command implements PromptsForMissingInput
+class MakeDto extends Command implements PromptsForMissingInput
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:action
-                            {name : The name of the class}
-                            {--api : Make the class inside app/Actions/Api directory}';
+    protected $signature = 'make:dto
+                            {name : The name of the class}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Creates an action class in app/Actions directory';
+    protected $description = 'Creates a DTO class in app/DTOs directory';
 
     /**
      * Execute the console command.
@@ -37,46 +36,22 @@ class MakeAction extends Command implements PromptsForMissingInput
         $hasPrefix = Str::contains($name, '/');
         $className = Str::studly($hasPrefix ? Str::afterLast($name, '/') : $name);
         $directoryPrefix = $hasPrefix ? Str::beforeLast($name, '/') : '';
-        $stubPath = base_path('stubs/action.stub');
-        $namespace = $this->option('api')
-            ? "App\Actions\Api".($directoryPrefix ? '\\'.$directoryPrefix : '')
-            : "App\Actions".($directoryPrefix ? '\\'.$directoryPrefix : '');
-        $directoryPath = $this->option('api')
-            ? app_path('Actions/Api/'.$directoryPrefix)
-            : app_path('Actions/'.$directoryPrefix);
+        $stubPath = base_path('stubs/dto.stub');
+        $namespace = "App\DTOs".($directoryPrefix ? '\\'.$directoryPrefix : '');
+        $directoryPath = app_path('DTOs/'.$directoryPrefix);
         $targetPath = "{$directoryPath}/{$className}.php";
 
         if (! File::exists($targetPath)) {
-            $this->ensureTheBaseActionClassExists();
-
             $this->ensureTheDirectoryExists($directoryPath);
 
             $this->generateClass($stubPath, $className, $namespace, $targetPath);
 
-            $this->components->info("Action class [$targetPath] created successfully.");
+            $this->components->info("DTO class [$targetPath] created successfully.");
         } else {
-            $this->components->error("Action class [$targetPath] already exists.");
+            $this->components->error("DTO class [$targetPath] already exists.");
         }
 
         return 0;
-    }
-
-    /**
-     * Ensure the BaseAction class exists
-     *
-     * @throws FileNotFoundException
-     */
-    private function ensureTheBaseActionClassExists(): void
-    {
-        if (! File::exists(app_path('Actions'))) {
-            File::makeDirectory(app_path('Actions'));
-        }
-
-        if (! File::exists('app/Actions/BaseAction.php')) {
-            $baseActionStub = File::get(base_path('stubs/base.action.stub'));
-
-            File::put('app/Actions/BaseAction.php', $baseActionStub);
-        }
     }
 
     /**
@@ -92,10 +67,10 @@ class MakeAction extends Command implements PromptsForMissingInput
     }
 
     /**
-     * Generate the Action class
+     * Generate the DTO class
      *
      * @param  string  $stubPath  path of the class stub
-     * @param  string  $className  name of the action class
+     * @param  string  $className  name of the DTO class
      * @param  string  $namespace  namespace of the class
      * @param  string  $targetPath  path to create the class
      *

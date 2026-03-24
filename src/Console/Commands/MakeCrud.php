@@ -26,9 +26,10 @@ class MakeCrud extends Command implements PromptsForMissingInput
         'Seeder',
         'Test',
         'Action',
+        'DTO',
         'Resource Route',
         'Views',
-        'All'
+        'All',
     ];
 
     protected array $selectedClasses = [];
@@ -62,7 +63,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
     {
         $option = $this->parseOption();
 
-        if (!$this->option('all')) {
+        if (! $this->option('all')) {
             $this->selectClasses($option);
         } else {
             $this->selectedClasses[] = 'All';
@@ -71,7 +72,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $model = Str::studly($this->argument('model'));
         $actions = $option === 'Api' ? $this->apiActions : $this->actions;
         $apiPrefix = $option === 'Api' ? 'Api/' : null;
-        $generateAll = in_array($this->classes[9], $this->selectedClasses);
+        $generateAll = in_array($this->classes[10], $this->selectedClasses);
 
         if ($generateAll || in_array($this->classes[0], $this->selectedClasses)) {
             $this->createModelMigration($model);
@@ -104,11 +105,15 @@ class MakeCrud extends Command implements PromptsForMissingInput
         }
 
         if ($generateAll || in_array($this->classes[7], $this->selectedClasses)) {
+            $this->createDto($model, $apiPrefix);
+        }
+
+        if ($generateAll || in_array($this->classes[8], $this->selectedClasses)) {
             $this->createRoute($model, $apiPrefix);
         }
 
-        if (!$apiPrefix) {
-            if ($generateAll || in_array($this->classes[8], $this->selectedClasses)) {
+        if (! $apiPrefix) {
+            if ($generateAll || in_array($this->classes[9], $this->selectedClasses)) {
                 $this->createViews($model, $option);
             }
         }
@@ -143,7 +148,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $option = 'Inertia';
         }
 
-        if (!$option) {
+        if (! $option) {
             $option = $this->choice(
                 'Choose Option',
                 ['Api', 'Blade', 'Inertia'],
@@ -175,8 +180,8 @@ class MakeCrud extends Command implements PromptsForMissingInput
             return;
         }
 
-        $selectableClasses = $option === 'Api' ? Arr::except($this->classes, [8, 9]) :
-            Arr::except($this->classes, [3, 9]);
+        $selectableClasses = $option === 'Api' ? Arr::except($this->classes, [9, 10]) :
+            Arr::except($this->classes, [3, 10]);
 
         if (str_starts_with(PHP_OS_FAMILY, 'Windows')) {
             // Fallback for Windows: show numbered list and prompt text input
@@ -279,7 +284,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
     {
         $directoryPath = $apiPrefix.$model.'Tests';
 
-        if (!File::exists($directoryPath)) {
+        if (! File::exists($directoryPath)) {
             File::makeDirectory($directoryPath, 0755, true);
         }
 
@@ -308,6 +313,19 @@ class MakeCrud extends Command implements PromptsForMissingInput
     }
 
     /**
+     * Create DTO Class
+     *
+     * @param  string  $model  the model name
+     * @param  string|null  $apiPrefix  prefix for API option
+     */
+    private function createDto(string $model, ?string $apiPrefix): void
+    {
+        $this->call('make:dto', [
+            'name' => $model.'Data',
+        ]);
+    }
+
+    /**
      * Create Resource Route
      *
      * @param  string  $model  the model name
@@ -323,7 +341,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $filePath = $apiPrefix ? base_path('routes/api.php') : base_path('routes/web.php');
 
         if ($apiPrefix) {
-            if (!File::exists(base_path('routes/api.php'))) {
+            if (! File::exists(base_path('routes/api.php'))) {
                 $this->call('install:api');
             }
         }
@@ -377,16 +395,16 @@ class MakeCrud extends Command implements PromptsForMissingInput
      */
     private function createBladeFiles(string $model, string $slug, string $variable): void
     {
-        if (!File::exists(base_path('resources/views/layouts/app.blade.php'))) {
+        if (! File::exists(base_path('resources/views/layouts/app.blade.php'))) {
             $appComponentStub = File::get(base_path('stubs/AppLayout.php.stub'));
             $appLayoutStub = File::get(base_path('stubs/app.blade.php.stub'));
             $navigationStub = File::get(base_path('stubs/navigation.blade.php.stub'));
 
-            if (!File::exists(base_path('resources/views/layouts'))) {
+            if (! File::exists(base_path('resources/views/layouts'))) {
                 File::makeDirectory(base_path('resources/views/layouts'), 0755, true);
             }
 
-            if (!File::exists(app_path('View/Components'))) {
+            if (! File::exists(app_path('View/Components'))) {
                 File::makeDirectory(app_path('View/Components'), 0755, true);
             }
 
@@ -410,12 +428,12 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $editStub = Str::replace(['{{ model }}', '{{ uri }}', '{{ variable }}'], [$model, $slug, $variable], $editStub);
 
         // create directory for the model
-        if (!File::exists(base_path("resources/views/{$slug}"))) {
+        if (! File::exists(base_path("resources/views/{$slug}"))) {
             File::makeDirectory(base_path("resources/views/{$slug}"), 0755, true);
         }
 
         // create files with dynamic content
-        if (!File::exists(base_path("resources/views/{$slug}/index.blade.php"))) {
+        if (! File::exists(base_path("resources/views/{$slug}/index.blade.php"))) {
             File::put(base_path("resources/views/{$slug}/index.blade.php"), $indexStub);
 
             $this->components->info("File [resources/views/{$slug}/index.blade.php] created successfully.");
@@ -423,7 +441,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $this->components->error("File [resources/views/{$slug}/index.blade.php] already exists.");
         }
 
-        if (!File::exists(base_path("resources/views/{$slug}/create.blade.php"))) {
+        if (! File::exists(base_path("resources/views/{$slug}/create.blade.php"))) {
             File::put(base_path("resources/views/{$slug}/create.blade.php"), $createStub);
 
             $this->components->info("File [resources/views/{$slug}/create.blade.php] created successfully.");
@@ -431,7 +449,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $this->components->error("File [resources/views/{$slug}/create.blade.php] already exists.");
         }
 
-        if (!File::exists(base_path("resources/views/{$slug}/show.blade.php"))) {
+        if (! File::exists(base_path("resources/views/{$slug}/show.blade.php"))) {
             File::put(base_path("resources/views/{$slug}/show.blade.php"), $showStub);
 
             $this->components->info("File [resources/views/{$slug}/show.blade.php] created successfully.");
@@ -439,7 +457,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $this->components->error("File [resources/views/{$slug}/show.blade.php] already exists.");
         }
 
-        if (!File::exists(base_path("resources/views/{$slug}/edit.blade.php"))) {
+        if (! File::exists(base_path("resources/views/{$slug}/edit.blade.php"))) {
             File::put(base_path("resources/views/{$slug}/edit.blade.php"), $editStub);
 
             $this->components->info("File [resources/views/{$slug}/edit.blade.php] created successfully.");
@@ -459,7 +477,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
      */
     private function createVueFiles(string $model, string $slug, string $variable): void
     {
-        if (!File::exists(base_path('resources/js/Layouts'))) {
+        if (! File::exists(base_path('resources/js/Layouts'))) {
             $appLayoutStub = File::get(base_path('stubs/AuthenticatedLayout.vue.stub'));
 
             File::makeDirectory(base_path('resources/js/Layouts'), 0755, true);
@@ -468,7 +486,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         }
 
         // create directory for the model
-        if (!File::exists(base_path("resources/js/Pages/{$model}"))) {
+        if (! File::exists(base_path("resources/js/Pages/{$model}"))) {
             File::makeDirectory(base_path("resources/js/Pages/{$model}"), 0755, true);
         }
 
@@ -487,7 +505,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
         $showStub = Str::replace(['{{ model }}', '{{ variable }}'], [$model, $variable], $showStub);
 
         // create files with dynamic content
-        if (!File::exists(base_path("resources/js/Pages/{$model}/Index.vue"))) {
+        if (! File::exists(base_path("resources/js/Pages/{$model}/Index.vue"))) {
             File::put(base_path("resources/js/Pages/{$model}/Index.vue"), $indexStub);
 
             $this->components->info("File [resources/js/Pages/{$model}/Index.vue] created successfully.");
@@ -495,7 +513,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $this->components->error("File [resources/js/Pages/{$model}/Index.vue] already exists.");
         }
 
-        if (!File::exists(base_path("resources/js/Pages/{$model}/CreateOrEdit.vue"))) {
+        if (! File::exists(base_path("resources/js/Pages/{$model}/CreateOrEdit.vue"))) {
             File::put(base_path("resources/js/Pages/{$model}/CreateOrEdit.vue"), $createOrEditStub);
 
             $this->components->info("File [resources/js/Pages/{$model}/CreateOrEdit.vue] created successfully.");
@@ -503,7 +521,7 @@ class MakeCrud extends Command implements PromptsForMissingInput
             $this->components->error("File [resources/js/Pages/{$model}/CreateOrEdit.vue] already exists.");
         }
 
-        if (!File::exists(base_path("resources/js/Pages/{$model}/Show.vue"))) {
+        if (! File::exists(base_path("resources/js/Pages/{$model}/Show.vue"))) {
             File::put(base_path("resources/js/Pages/{$model}/Show.vue"), $showStub);
 
             $this->components->info("File [resources/js/Pages/{$model}/Show.vue] created successfully.");
