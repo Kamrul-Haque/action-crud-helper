@@ -16,7 +16,8 @@ class MakeDto extends Command implements PromptsForMissingInput
      * @var string
      */
     protected $signature = 'make:dto
-                            {name : The name of the class}';
+                            {name : The name of the class}
+                            {--api : Make the class inside app/DTOs/Api directory}';
 
     /**
      * The console command description.
@@ -32,13 +33,18 @@ class MakeDto extends Command implements PromptsForMissingInput
      */
     public function handle(): int
     {
-        $name = $this->argument('name');
+        $name = str_replace('\\', '/', $this->argument('name'));
         $hasPrefix = Str::contains($name, '/');
         $className = Str::studly($hasPrefix ? Str::afterLast($name, '/') : $name);
         $directoryPrefix = $hasPrefix ? Str::beforeLast($name, '/') : '';
         $stubPath = base_path('stubs/dto.stub');
-        $namespace = "App\DTOs".($directoryPrefix ? '\\'.$directoryPrefix : '');
-        $directoryPath = app_path('DTOs/'.$directoryPrefix);
+        $namespacePrefix = $directoryPrefix ? '\\'.str_replace('/', '\\', $directoryPrefix) : '';
+        $namespace = $this->option('api')
+            ? "App\DTOs\Api".$namespacePrefix
+            : "App\DTOs\Web".$namespacePrefix;
+        $directoryPath = $this->option('api')
+            ? app_path('DTOs/Api/'.$directoryPrefix)
+            : app_path('DTOs/Web/'.$directoryPrefix);
         $targetPath = "{$directoryPath}/{$className}.php";
 
         if (! File::exists($targetPath)) {

@@ -71,7 +71,8 @@ class MakeCrud extends Command implements PromptsForMissingInput
 
         $model = Str::studly($this->argument('model'));
         $actions = $option === 'Api' ? $this->apiActions : $this->actions;
-        $apiPrefix = $option === 'Api' ? 'Api/' : null;
+        $isApi = $option === 'Api';
+        $prefix = $isApi ? 'Api/' : 'Web/';
         $generateAll = in_array($this->classes[10], $this->selectedClasses);
 
         if ($generateAll || in_array($this->classes[0], $this->selectedClasses)) {
@@ -79,14 +80,14 @@ class MakeCrud extends Command implements PromptsForMissingInput
         }
 
         if ($generateAll || in_array($this->classes[1], $this->selectedClasses)) {
-            $this->createController($model, $apiPrefix);
+            $this->createController($model, $prefix, $isApi);
         }
 
         if ($generateAll || in_array($this->classes[2], $this->selectedClasses)) {
-            $this->createRequest($model, $apiPrefix);
+            $this->createRequest($model, $prefix);
         }
 
-        if ($apiPrefix == 'Api/') {
+        if ($isApi) {
             if ($generateAll || in_array($this->classes[3], $this->selectedClasses)) {
                 $this->createResource($model);
             }
@@ -97,22 +98,22 @@ class MakeCrud extends Command implements PromptsForMissingInput
         }
 
         if ($generateAll || in_array($this->classes[5], $this->selectedClasses)) {
-            $this->createTest($actions, $model, $apiPrefix);
+            $this->createTest($actions, $model, $prefix);
         }
 
         if ($generateAll || in_array($this->classes[6], $this->selectedClasses)) {
-            $this->createActions($actions, $model, $apiPrefix);
+            $this->createActions($actions, $model, $isApi);
         }
 
         if ($generateAll || in_array($this->classes[7], $this->selectedClasses)) {
-            $this->createDto($model, $apiPrefix);
+            $this->createDto($model, $isApi);
         }
 
         if ($generateAll || in_array($this->classes[8], $this->selectedClasses)) {
-            $this->createRoute($model, $apiPrefix);
+            $this->createRoute($model, $prefix, $isApi);
         }
 
-        if (! $apiPrefix) {
+        if (! $isApi) {
             if ($generateAll || in_array($this->classes[9], $this->selectedClasses)) {
                 $this->createViews($model, $option);
             }
@@ -224,15 +225,16 @@ class MakeCrud extends Command implements PromptsForMissingInput
      * Create Resourceful Controller
      *
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  string  $prefix  prefix for directory structure
+     * @param  bool  $isApi  whether it is API mode
      */
-    private function createController(string $model, ?string $apiPrefix): void
+    private function createController(string $model, string $prefix, bool $isApi): void
     {
         $this->call('make:controller', [
-            'name' => $apiPrefix.$model.'Controller',
+            'name' => $prefix.$model.'Controller',
             '--model' => $model,
             '--resource' => true,
-            '--api' => (bool) $apiPrefix,
+            '--api' => $isApi,
         ]);
     }
 
@@ -240,12 +242,12 @@ class MakeCrud extends Command implements PromptsForMissingInput
      * Create Form Request Class
      *
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  string  $prefix  prefix for directory structure
      */
-    private function createRequest(string $model, ?string $apiPrefix): void
+    private function createRequest(string $model, string $prefix): void
     {
         $this->call('make:request', [
-            'name' => $apiPrefix.$model.'Request',
+            'name' => $prefix.$model.'Request',
         ]);
     }
 
@@ -278,11 +280,11 @@ class MakeCrud extends Command implements PromptsForMissingInput
      *
      * @param  array  $actions  list of actions
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  string  $prefix  prefix for directory structure
      */
-    private function createTest(array $actions, string $model, ?string $apiPrefix): void
+    private function createTest(array $actions, string $model, string $prefix): void
     {
-        $directoryPath = $apiPrefix.$model.'Tests';
+        $directoryPath = $prefix.$model.'Tests';
 
         if (! File::exists($directoryPath)) {
             File::makeDirectory($directoryPath, 0755, true);
@@ -300,14 +302,14 @@ class MakeCrud extends Command implements PromptsForMissingInput
      *
      * @param  array  $actions  list of actions
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  bool  $isApi  whether it is API mode
      */
-    private function createActions(array $actions, string $model, ?string $apiPrefix): void
+    private function createActions(array $actions, string $model, bool $isApi): void
     {
         foreach ($actions as $action) {
             $this->call('make:action', [
                 'name' => $model.'Actions/'.$action.$model.'Action',
-                '--api' => (bool) $apiPrefix,
+                '--api' => $isApi,
             ]);
         }
     }
@@ -316,12 +318,13 @@ class MakeCrud extends Command implements PromptsForMissingInput
      * Create DTO Class
      *
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  bool  $isApi  whether it is API mode
      */
-    private function createDto(string $model, ?string $apiPrefix): void
+    private function createDto(string $model, bool $isApi): void
     {
         $this->call('make:dto', [
             'name' => $model.'Data',
+            '--api' => $isApi,
         ]);
     }
 
@@ -329,27 +332,32 @@ class MakeCrud extends Command implements PromptsForMissingInput
      * Create Resource Route
      *
      * @param  string  $model  the model name
-     * @param  string|null  $apiPrefix  prefix for API option
+     * @param  string  $prefix  prefix for directory structure
+     * @param  bool  $isApi  whether it is API mode
      */
-    private function createRoute(string $model, ?string $apiPrefix): void
+    private function createRoute(string $model, string $prefix, bool $isApi): void
     {
         $uri = Str::plural(Str::slug(Str::snake($model)));
-        $prefix = $apiPrefix ? rtrim($apiPrefix, '/').'\\' : '';
-        $route = $apiPrefix
-            ? "\nRoute::apiResource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);"
-            : "\nRoute::resource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);";
-        $filePath = $apiPrefix ? base_path('routes/api.php') : base_path('routes/web.php');
+        $controllerNamespacePrefix = $prefix ? rtrim($prefix, '/').'\\' : '';
+        $route = $isApi
+            ? "\nRoute::apiResource('{$uri}', App\Http\Controllers\\{$controllerNamespacePrefix}{$model}Controller::class);"
+            : "\nRoute::resource('{$uri}', App\Http\Controllers\\{$controllerNamespacePrefix}{$model}Controller::class);";
+        $filePath = $isApi ? base_path('routes/api.php') : base_path('routes/web.php');
 
-        if ($apiPrefix) {
+        if ($isApi) {
             if (! File::exists(base_path('routes/api.php'))) {
                 $this->call('install:api');
             }
         }
 
+        $searchRoute = $isApi
+            ? "Route::apiResource('{$uri}', App\Http\Controllers\\{$controllerNamespacePrefix}{$model}Controller::class);"
+            : "Route::resource('{$uri}', App\Http\Controllers\\{$controllerNamespacePrefix}{$model}Controller::class);";
+
         if (
             str_contains(
                 file_get_contents($filePath),
-                "Route::resource('{$uri}', App\Http\Controllers\\{$prefix}{$model}Controller::class);"
+                $searchRoute
             )
         ) {
             $this->components->error('Route already exists.');

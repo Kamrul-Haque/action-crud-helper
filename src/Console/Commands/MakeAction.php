@@ -33,17 +33,18 @@ class MakeAction extends Command implements PromptsForMissingInput
      */
     public function handle(): int
     {
-        $name = $this->argument('name');
+        $name = str_replace('\\', '/', $this->argument('name'));
         $hasPrefix = Str::contains($name, '/');
         $className = Str::studly($hasPrefix ? Str::afterLast($name, '/') : $name);
         $directoryPrefix = $hasPrefix ? Str::beforeLast($name, '/') : '';
         $stubPath = base_path('stubs/action.stub');
+        $namespacePrefix = $directoryPrefix ? '\\'.str_replace('/', '\\', $directoryPrefix) : '';
         $namespace = $this->option('api')
-            ? "App\Actions\Api".($directoryPrefix ? '\\'.$directoryPrefix : '')
-            : "App\Actions".($directoryPrefix ? '\\'.$directoryPrefix : '');
+            ? "App\Actions\Api".$namespacePrefix
+            : "App\Actions\Web".$namespacePrefix;
         $directoryPath = $this->option('api')
             ? app_path('Actions/Api/'.$directoryPrefix)
-            : app_path('Actions/'.$directoryPrefix);
+            : app_path('Actions/Web/'.$directoryPrefix);
         $targetPath = "{$directoryPath}/{$className}.php";
 
         if (! File::exists($targetPath)) {
